@@ -24,7 +24,7 @@ class CsvLoader:
 		''')
 
 		filename = self.filename
-		self.print_with_time('Start loading ' + filename + ' into postgis ' + database)
+		self.print_with_time('Start loading ' + filename + ' into ' + database)
 
 		with open(filename, newline='') as csvfile:
 			reader = csv.reader(csvfile)

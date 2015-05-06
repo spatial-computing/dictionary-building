@@ -11,9 +11,9 @@ class GeoNamesLoader:
 
 	def load_into_postgis(self, database, user, password):
 		conn = psycopg2.connect(database=database, user=user, password=password)
+		cursor = conn.cursor()
 
 		# Create table
-		cursor = conn.cursor()
 		cursor.execute('''
 			CREATE TABLE IF NOT EXISTS entity (
 				id bigserial PRIMARY KEY,
@@ -30,9 +30,10 @@ class GeoNamesLoader:
 				geom geometry(POINT, 4326) NOT NULL
 			)
 		''')
+		conn.commit()
 
 		filename = self.filename
-		self.print_with_time('Start loading ' + filename + ' into postgis ' + database)
+		self.print_with_time('Start loading ' + filename + ' into ' + database)
 
 		with open(filename) as f:
 			for line in f:
@@ -55,8 +56,10 @@ class GeoNamesLoader:
 					(inserted_id, lon, lat)
 				)
 
-		conn.commit()
+				# self.print_with_time('Commit ' + str(inserted_id))
+
 		cursor.close()
+		conn.commit()
 		conn.close()
 
 		self.print_with_time("Loading completed.")

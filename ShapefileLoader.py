@@ -13,9 +13,9 @@ class ShapefileLoader:
 
 	def load_into_postgis(self, database, user, password):
 		conn = psycopg2.connect(database=database, user=user, password=password)
+		cursor = conn.cursor()
 
 		# Create table
-		cursor = conn.cursor()
 		cursor.execute('''
 			CREATE TABLE IF NOT EXISTS entity (
 				id bigserial PRIMARY KEY,
@@ -32,29 +32,29 @@ class ShapefileLoader:
 				geom geometry(POINT, 4326) NOT NULL
 			)
 		''')
-		cursor.close()
+		conn.commit()
 
 		source = self.source
-		self.print_with_time('Start loading ' + source + ' into postgis ' + database)
+		self.print_with_time('Start loading ' + source + ' into ' + database)
 
 		if os.path.isfile(source):
-			self.__load_shapefile_into_postgis(source, conn)
+			self.__load_shapefile_into_postgis(source, conn, cursor)
 		elif os.path.isdir(source):
 			for root, dirs, files in os.walk(source):
 				for name in files:
-					self.__load_shapefile_into_postgis(os.path.join(root, name), conn)
+					self.__load_shapefile_into_postgis(os.path.join(root, name), conn, cursor)
 
+		cursor.close()
 		conn.commit()
 		conn.close()
 
 		self.print_with_time("Loading completed.")
 
 
-	def __load_shapefile_into_postgis(self, filename, conn):
+	def __load_shapefile_into_postgis(self, filename, conn, cursor):
 		if not filename.endswith('.shp'):
 			return
 
-		cursor = conn.cursor()
 		self.print_with_time('Start loading ' + filename)
 
 		sf = shapefile.Reader(filename)
@@ -79,6 +79,7 @@ class ShapefileLoader:
 				'INSERT INTO entity(name, category, source, create_time) VALUES(%s, %s, %s, %s) RETURNING id',
 				(name, category, 'Ordnance Survey', datetime.datetime.now())
 			)
+
 			inserted_id = cursor.fetchone()[0]
 
 			for point in shape.points:
@@ -87,7 +88,8 @@ class ShapefileLoader:
 					(inserted_id, point[0], point[1])
 				)
 
-		cursor.close()
+			# self.print_with_time('Commit ' + str(inserted_id))
+		conn.commit()
 
 
 	def print_with_time(self, str):

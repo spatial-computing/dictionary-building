@@ -11,11 +11,12 @@ import psycopg2
 class OsmLoader:
 	def __init__(self, osm_file):
 		self.osm_file = osm_file
-		self.sqlite3_db = 'sqlite3.db'
+		self.sqlite3_db = os.path.join(os.path.dirname(osm_file), 'sqlite3.db')
 
 
 	def __load_into_sqlite(self):
 		if os.path.exists(self.sqlite3_db):
+			return
 			print('Remove ' + self.sqlite3_db)
 			os.remove(self.sqlite3_db)
 
@@ -29,6 +30,7 @@ class OsmLoader:
 
 		conn = sqlite3.connect(self.sqlite3_db)
 		cursor = conn.cursor()
+
 		# Create table
 		cursor.execute('''
 			CREATE TABLE node (
@@ -48,6 +50,7 @@ class OsmLoader:
 				coords TEXT
 			)
 		''')
+		conn.commit()
 
 		context = etree.iterparse(fin, events=('end',), tag=('node', 'way', 'relation'))
 
@@ -83,10 +86,10 @@ class OsmLoader:
 			while elem.getprevious() is not None:
 				del elem.getparent()[0]
 
-		conn.commit()
-		cursor.close()
-		conn.close()
 		fin.close()
+		cursor.close()
+		conn.commit()
+		conn.close()
 
 		self.print_with_time("Loading completed.")
 
@@ -95,7 +98,7 @@ class OsmLoader:
 		self.__load_into_sqlite()
 
 		osm_file = self.osm_file
-		self.print_with_time('Start loading ' + osm_file + ' into postgis ' + database)
+		self.print_with_time('Start loading ' + osm_file + ' into ' + database)
 
 		if osm_file.endswith('.bz2'):
 			fin = bz2.BZ2File(osm_file, 'r')
@@ -123,6 +126,7 @@ class OsmLoader:
 				geom geometry(POINT, 4326) NOT NULL
 			)
 		''')
+		conn.commit()
 
 		context = etree.iterparse(fin, events=('end',), tag=('node', 'way', 'relation'))
 		prev = None
@@ -170,11 +174,11 @@ class OsmLoader:
 							(inserted_id, coord['lon'], coord['lat'])
 						)
 
-		conn.commit()
+		fin.close()
 		cursor.close()
+		conn.commit()
 		conn.close()
 		osm_conn.close()
-		fin.close()
 
 		self.print_with_time("Loading completed.")
 
