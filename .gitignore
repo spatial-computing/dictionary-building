@@ -9,7 +9,7 @@ ehthumbs.db
 Thumbs.db
 
 # data folder
-OpenStreetMap
-OrdnanceSurvey
-GeoNames
-CSV
+osm
+ordnance-survey
+geonames
+csv
