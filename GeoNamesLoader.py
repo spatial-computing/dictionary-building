@@ -56,8 +56,6 @@ class GeoNamesLoader:
 					(inserted_id, lon, lat)
 				)
 
-				# self.print_with_time('Commit ' + str(inserted_id))
-
 		cursor.close()
 		conn.commit()
 		conn.close()
@@ -68,7 +66,8 @@ class GeoNamesLoader:
 	def print_with_time(self, str):
 		print(time.strftime("%H:%M:%S") + ' ' + str)
 
-
+		
+# test program
 if __name__ == "__main__":
 	filename = sys.argv[1]
 	loader = GeoNamesLoader(filename)

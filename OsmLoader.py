@@ -16,7 +16,6 @@ class OsmLoader:
 
 	def __load_into_sqlite(self):
 		if os.path.exists(self.sqlite3_db):
-			return
 			print('Remove ' + self.sqlite3_db)
 			os.remove(self.sqlite3_db)
 
@@ -187,6 +186,7 @@ class OsmLoader:
 		print(time.strftime("%H:%M:%S") + ' ' + str)
 
 
+# test program
 if __name__ == "__main__":
 	osm_file = sys.argv[1]
 	loader = OsmLoader(osm_file)

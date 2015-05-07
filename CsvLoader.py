@@ -48,6 +48,7 @@ class CsvLoader:
 		print(time.strftime("%H:%M:%S") + ' ' + str)
 
 
+# test program
 if __name__ == "__main__":
 	filename = sys.argv[1]
 	loader = CsvLoader(filename)

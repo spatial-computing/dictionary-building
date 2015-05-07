@@ -58,20 +58,28 @@ class ShapefileLoader:
 		self.print_with_time('Start loading ' + filename)
 
 		sf = shapefile.Reader(filename)
+
+		# find indices of fields that are called 'NAME' 
 		indices_of_name_field = [i-1 for i, attr in enumerate(sf.fields) if 'NAME' == attr[0]]
 
+		# use fields that contain 'NAME' if no 'NAME' field found 
 		if not indices_of_name_field:
 			indices_of_name_field = [i-1 for i, attr in enumerate(sf.fields) if 'NAME' in attr[0]]
+
+		# skip record that does not have a 'NAME' field
 		if not indices_of_name_field:
 			return
+
+		# something maybe wrong
 		if len(indices_of_name_field) > 1:
-			print('Warning: There are multiple fields containing "NAME" in file ', filename)
+			print('Warning: There are multiple fields containing "NAME" in ', filename)
 
 		category = os.path.basename(filename).rpartition('.')[0]
 		shapeRecords = sf.iterShapeRecords()
 
 		for shape, record in shapeRecords:
 			name = ', '.join([record[i] for i in indices_of_name_field if isinstance(record[i], str)])
+			# skip record whose name is empty
 			if not name:
 				continue
 
@@ -88,14 +96,12 @@ class ShapefileLoader:
 					(inserted_id, point[0], point[1])
 				)
 
-			# self.print_with_time('Commit ' + str(inserted_id))
-		conn.commit()
-
 
 	def print_with_time(self, str):
 		print(time.strftime("%H:%M:%S") + ' ' + str)
 
 
+# test program
 if __name__ == "__main__":
 	source = sys.argv[1]
 	loader = ShapefileLoader(source)
