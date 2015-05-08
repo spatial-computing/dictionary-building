@@ -35,7 +35,7 @@ class GeoNamesLoader:
 		filename = self.filename
 		self.print_with_time('Start loading ' + filename + ' into ' + database)
 
-		with open(filename) as f:
+		with open(filename, encoding="utf8") as f:
 			for line in f:
 				values = line.split('\t')
 				name = values[1]

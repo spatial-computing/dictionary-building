@@ -13,9 +13,13 @@ user='postgres'
 password='postgres'
 
 loader = OsmLoader('osm' + os.sep + 'great-britain-latest.osm.bz2')
+# this is for testing
+# loader = OsmLoader('osm' + os.sep + 'slough_england.osm')
 loader.load_into_postgis(database, user, password)
 
 loader = ShapefileLoader('ordnance-survey')
+# this is for testing
+# loader = ShapefileLoader('ordnance-survey' + os.sep + 'rndabout_point.shp')
 loader.load_into_postgis(database, user, password)
 
 loader = GeoNamesLoader('geonames' + os.sep + 'GB.txt')
